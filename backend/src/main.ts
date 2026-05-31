@@ -63,7 +63,7 @@ async function bootstrap() {
     },
   });
 
-  const port = process.env.PORT || 3001;
+  const port = process.env.PORT || 3002;
   await app.listen(port);
 
   logger.log(`🚀 CRM Político API rodando em: http://localhost:${port}/api/v1`);

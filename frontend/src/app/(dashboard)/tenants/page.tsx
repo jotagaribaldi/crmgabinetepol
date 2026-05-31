@@ -39,12 +39,13 @@ const tenantFormSchema = zod.object({
     message: 'Apenas letras minúsculas, números e hifens',
   }),
   document: zod.string().optional(),
-  email: zod.string().email({ message: 'E-mail inválido' }).or(zod.literal('')),
+  email: zod.string().email({ message: 'E-mail inválido' }),
   phone: zod.string().optional(),
   party: zod.string().optional(),
   position: zod.string().optional(),
   state: zod.string().max(2, { message: 'Use apenas a sigla (ex: SP)' }).optional(),
   city: zod.string().optional(),
+  password: zod.string().optional().or(zod.literal('')),
 });
 
 type TenantFormValues = zod.infer<typeof tenantFormSchema>;
@@ -136,6 +137,7 @@ export default function TenantsPage() {
       position: '',
       state: '',
       city: '',
+      password: '',
     });
     setIsOpen(true);
   };
@@ -152,6 +154,7 @@ export default function TenantsPage() {
       position: tenant.position || '',
       state: tenant.state || '',
       city: tenant.city || '',
+      password: '',
     });
     setIsOpen(true);
   };
@@ -162,6 +165,21 @@ export default function TenantsPage() {
   };
 
   const onSubmit = (data: TenantFormValues) => {
+    if (!editingTenant && (!data.password || data.password.length < 8)) {
+      toast.error('Erro de validação', {
+        description: 'A senha é obrigatória e deve ter no mínimo 8 caracteres ao criar um gabinete.',
+      });
+      return;
+    }
+    if (!editingTenant && data.password) {
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/;
+      if (!passwordRegex.test(data.password)) {
+        toast.error('Erro de validação', {
+          description: 'A senha deve conter pelo menos uma letra maiúscula, um número e um símbolo (!@#$%^&*).',
+        });
+        return;
+      }
+    }
     saveMutation.mutate(data);
   };
 
@@ -357,6 +375,20 @@ export default function TenantsPage() {
                 {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
               </div>
             </div>
+
+            {!editingTenant && (
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-zinc-350">Senha de Acesso do Político</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Mínimo 8 caracteres (com maiúscula, número e símbolo)"
+                  className="bg-zinc-950/60 border-zinc-800 text-white"
+                  {...register('password')}
+                />
+                {errors.password && <p className="text-xs text-red-400">{errors.password.message}</p>}
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">

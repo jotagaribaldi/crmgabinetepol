@@ -22,6 +22,7 @@ class CreateTenantDto {
     position;
     state;
     city;
+    password;
 }
 exports.CreateTenantDto = CreateTenantDto;
 __decorate([
@@ -47,9 +48,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTenantDto.prototype, "document", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 'candidato@email.com' }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ example: 'candidato@email.com', description: 'E-mail oficial e de login do candidato' }),
     (0, class_validator_1.IsEmail)({}, { message: 'E-mail inválido' }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'E-mail é obrigatório' }),
     __metadata("design:type", String)
 ], CreateTenantDto.prototype, "email", void 0);
 __decorate([
@@ -86,4 +87,16 @@ __decorate([
     (0, class_validator_1.MaxLength)(150),
     __metadata("design:type", String)
 ], CreateTenantDto.prototype, "city", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Senha@2026!',
+        description: 'Senha de acesso para o usuário político associado (mín. 8 caracteres, letra maiúscula, número e símbolo)',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(8, { message: 'Senha deve ter pelo menos 8 caracteres' }),
+    (0, class_validator_1.Matches)(/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/, {
+        message: 'Senha deve conter letra maiúscula, número e símbolo (!@#$%^&*)',
+    }),
+    __metadata("design:type", String)
+], CreateTenantDto.prototype, "password", void 0);
 //# sourceMappingURL=create-tenant.dto.js.map

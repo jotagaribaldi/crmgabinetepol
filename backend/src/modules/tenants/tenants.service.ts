@@ -4,11 +4,12 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../database/prisma.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { QueryTenantDto } from './dto/query-tenant.dto';
-import { AuditAction, Prisma } from '@prisma/client';
+import { AuditAction, Prisma, Role } from '@prisma/client';
 
 @Injectable()
 export class TenantsService {
@@ -17,6 +18,8 @@ export class TenantsService {
   // ── Create ───────────────────────────────────────────────────────────
 
   async create(dto: CreateTenantDto, actorUserId: string) {
+    const { password, ...tenantData } = dto;
+
     const existing = await this.prisma.tenant.findFirst({
       where: {
         OR: [
@@ -33,7 +36,33 @@ export class TenantsService {
       throw new ConflictException('Documento já cadastrado para outro candidato');
     }
 
-    const tenant = await this.prisma.tenant.create({ data: dto });
+    // Valida unicidade do e-mail do usuário no sistema
+    const existingEmail = await this.prisma.user.findUnique({
+      where: { email: dto.email.toLowerCase() },
+    });
+    if (existingEmail) {
+      throw new ConflictException('E-mail informado já cadastrado para outro usuário');
+    }
+
+    const BCRYPT_ROUNDS = 12;
+    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+
+    const tenant = await this.prisma.$transaction(async (tx) => {
+      const createdTenant = await tx.tenant.create({ data: tenantData });
+
+      await tx.user.create({
+        data: {
+          name: createdTenant.name,
+          email: createdTenant.email!.toLowerCase(),
+          passwordHash,
+          role: Role.POLITICO,
+          phone: createdTenant.phone,
+          tenantId: createdTenant.id,
+        },
+      });
+
+      return createdTenant;
+    });
 
     await this.auditLog(actorUserId, null, AuditAction.CREATE, 'Tenant', tenant.id, null, tenant);
 

@@ -29,10 +29,10 @@ export class CreateTenantDto {
   @IsString()
   document?: string;
 
-  @ApiPropertyOptional({ example: 'candidato@email.com' })
-  @IsOptional()
+  @ApiProperty({ example: 'candidato@email.com', description: 'E-mail oficial e de login do candidato' })
   @IsEmail({}, { message: 'E-mail inválido' })
-  email?: string;
+  @IsNotEmpty({ message: 'E-mail é obrigatório' })
+  email: string;
 
   @ApiPropertyOptional({ example: '(11) 99999-9999' })
   @IsOptional()
@@ -62,4 +62,15 @@ export class CreateTenantDto {
   @IsString()
   @MaxLength(150)
   city?: string;
+
+  @ApiProperty({
+    example: 'Senha@2026!',
+    description: 'Senha de acesso para o usuário político associado (mín. 8 caracteres, letra maiúscula, número e símbolo)',
+  })
+  @IsString()
+  @MinLength(8, { message: 'Senha deve ter pelo menos 8 caracteres' })
+  @Matches(/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/, {
+    message: 'Senha deve conter letra maiúscula, número e símbolo (!@#$%^&*)',
+  })
+  password: string;
 }
