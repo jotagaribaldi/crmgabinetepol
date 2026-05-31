@@ -86,7 +86,7 @@ export default function RegionsPage() {
     },
   });
 
-  const states = statesResponse?.data || [];
+  const states = statesResponse?.data?.items || [];
 
   // Busca municípios com base no estado selecionado no modal
   const { data: municipalities, isLoading: isLoadingMunicipalities } = useQuery({

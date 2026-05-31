@@ -58,7 +58,7 @@ export default function ReportsPage() {
     queryKey: ['municipalities-report'],
     queryFn: async () => {
       const res = await api.get('/states');
-      const state = res.data?.[0];
+      const state = res.data?.data?.items?.[0];
       if (!state) return [];
       const mRes = await api.get(`/municipalities/state/${state.id}/all`);
       return mRes.data?.data || [];

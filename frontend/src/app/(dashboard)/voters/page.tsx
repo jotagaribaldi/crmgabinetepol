@@ -215,7 +215,7 @@ export default function VotersPage() {
     queryFn: async () => {
       // Pega estado padrão (como SP)
       const res = await api.get('/states');
-      const state = res.data?.[0]; // Pega primeiro estado ativo
+      const state = res.data?.data?.items?.[0]; // Pega primeiro estado ativo
       if (!state) return [];
       const mRes = await api.get(`/municipalities/state/${state.id}/all`);
       return mRes.data?.data || [];
